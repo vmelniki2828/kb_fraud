@@ -13,9 +13,8 @@ export const MainContent = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: ${props => props.hasRequest ? 'flex-start' : 'center'};
-  padding: ${props => props.hasRequest ? '40px 20px 20px 20px' : '0'};
+  padding: ${props => props.hasRequest ? '40px 20px 0 20px' : '0'};
   transition: margin-left 0.3s ease;
-  min-height: 100vh;
 `;
 
 export const GetRequestButton = styled.button`
@@ -568,39 +567,74 @@ export const HoldListToggle = styled.button`
   }
 `;
 
+export const HoldRequestsContent = styled.div`
+  max-height: ${props => props.expanded ? '800px' : '0'};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #12092A;
+  width: 100%;
+`;
+
 export const HoldRequestsTable = styled.table`
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: linear-gradient(135deg, rgba(108, 71, 255, 0.1) 0%, rgba(18, 9, 42, 0.8) 100%);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(108, 71, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(108, 71, 255, 0.3);
-  position: relative;
-  max-height: ${props => props.expanded ? '300px' : '0'};
-  opacity: ${props => props.expanded ? '1' : '0'};
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  margin-bottom: 40px;
+  display: ${props => props.expanded ? 'table' : 'none'};
+  opacity: ${props => props.expanded ? 1 : 0};
+  transform: ${props => props.expanded ? 'translateY(0)' : 'translateY(-20px)'};
+  transition: all 0.3s ease;
+`;
+
+export const HoldPagination = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+`;
+
+export const PaginationButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(108, 71, 255, 0.3);
+  background: rgba(108, 71, 255, 0.1);
+  border-radius: 8px;
+  color: #6c47ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 18px;
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #6c47ff, #9d7bff, #6c47ff);
-    background-size: 200% 100%;
-    animation: shimmer 3s infinite;
+  &:hover {
+    background: rgba(108, 71, 255, 0.2);
+    border-color: rgba(108, 71, 255, 0.5);
+    transform: translateY(-2px);
   }
   
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    
+    &:hover {
+      background: rgba(108, 71, 255, 0.1);
+      border-color: rgba(108, 71, 255, 0.3);
+      transform: none;
+    }
   }
+`;
+
+export const PaginationInfo = styled.div`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 export const HoldTableBody = styled.tbody`
@@ -684,13 +718,6 @@ export const HoldTableCell = styled.td`
       font-size: 0.85rem;
     }
   }
-`;
-
-export const HoldRequestsContent = styled.div`
-  max-height: ${props => props.expanded ? '400px' : '0'};
-  overflow: ${props => props.expanded ? 'visible' : 'hidden'};
-  opacity: ${props => props.expanded ? '1' : '0'};
-  transition: max-height 0.3s ease, opacity 0.3s ease;
 `;
 
 // Красивые стили для комментариев

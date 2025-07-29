@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { MdPause, MdStop, MdClose, MdAttachFile, MdExpandMore, MdDownload } from 'react-icons/md';
+import { MdPause, MdStop, MdClose, MdAttachFile, MdExpandMore, MdDownload, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import Sidebar from '../Sidebar';
 import { 
@@ -38,6 +38,9 @@ import {
   HoldTableBody,
   HoldTableRow,
   HoldTableCell,
+  HoldPagination,
+  PaginationButton,
+  PaginationInfo,
   RequestDetailsSection,
   CommentsSection,
   CommentsSectionTitle,
@@ -171,12 +174,8 @@ const Requests = () => {
       const data = await response.json();
       console.log('Hold requests получены:', data);
       
-      if (page === 1) {
-        setHoldRequests(data.results || data || []);
-      } else {
-        setHoldRequests(prev => [...prev, ...(data.results || data || [])]);
-      }
-      
+      // Всегда заменяем массив новыми данными
+      setHoldRequests(data.results || data || []);
       setHoldRequestsPage(page);
       
     } catch (error) {
@@ -574,6 +573,16 @@ const Requests = () => {
     }
   };
 
+  const handlePrevPage = () => {
+    if (holdRequestsPage > 1) {
+      fetchHoldRequests(holdRequestsPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    fetchHoldRequests(holdRequestsPage + 1);
+  };
+
   const handleDownloadFile = async (filePathOrObject) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('tokens'));
@@ -585,25 +594,23 @@ const Requests = () => {
       let downloadUrl;
       let fileName;
       
-      // Проверяем, является ли файл строкой (путь) или объектом
       if (typeof filePathOrObject === 'string') {
-        // Это путь из массива files комментария: "uploads/comments/user_23_35d4cf44-96d6-4c11-a4a9-08779e7a3301.jpg"
-        // Извлекаем только имя файла из пути (последняя часть после "/")
+        // Используем только имя файла
         fileName = filePathOrObject.split('/').pop() || 'file';
         downloadUrl = `${getBaseUrl()}/antifraud-app/files/${fileName}`;
       } else {
-        // Это объект файла с полными данными
         downloadUrl = filePathOrObject.url || `${getBaseUrl()}/antifraud-app/files/${filePathOrObject.id}`;
         fileName = filePathOrObject.name || filePathOrObject.filename || `file_${filePathOrObject.id}`;
       }
       
       console.log('Скачивание файла:', { downloadUrl, fileName, fileData: filePathOrObject });
+
+      // Создаем URL с токеном
+      const urlWithToken = new URL(downloadUrl);
+      urlWithToken.searchParams.append('token', tokens.access);
       
-      const response = await fetch(downloadUrl, {
+      const response = await fetch(urlWithToken, {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${tokens.access}`,
-        },
       });
 
       if (!response.ok) {
@@ -676,7 +683,7 @@ const Requests = () => {
       <MainContent hasRequest={!!currentRequest}>
         {isPaused ? (
           <PauseMenu>
-            <PauseMessage>{pauseMessage}</PauseMessage>
+            <PauseMessage>Работа приостановлена - вы не будете получать новые заявки</PauseMessage>
             <ResumeButton onClick={handleResume}>
               Возобновить работу
             </ResumeButton>
@@ -715,7 +722,7 @@ const Requests = () => {
               <TableRow>
                 <TableCell>{currentRequest.s_project?.name || '-'}</TableCell>
                 <TableCell>{currentRequest.s_user_id || '-'}</TableCell>
-                <TableCell>{currentRequest.id || '-'}</TableCell>
+                <TableCell>{currentRequest.s_request_id || '-'}</TableCell>
                 <TableCell>{currentRequest.s_amount ? `${currentRequest.s_amount} ${currentRequest.s_currency}` : '-'}</TableCell>
                 <TableCell>{currentRequest.s_type || '-'}</TableCell>
                 <TableCell>{currentRequest.s_created_at ? new Date(currentRequest.s_created_at).toLocaleString('ru-RU', {
@@ -878,17 +885,18 @@ const Requests = () => {
                   <LoadingText>Загрузка отложенных заявок...</LoadingText>
                 </LoadingWrapper>
               ) : holdRequests.length > 0 ? (
-                <HoldRequestsTable expanded={holdRequestsExpanded}>
-                  <HoldTableHeader expanded={holdRequestsExpanded}>
-                    <HoldTableCell>Project</HoldTableCell>
-                    <HoldTableCell>User ID</HoldTableCell>
-                    <HoldTableCell>Request ID</HoldTableCell>
-                    <HoldTableCell>Sum</HoldTableCell>
-                    <HoldTableCell>Type</HoldTableCell>
-                    <HoldTableCell>Date</HoldTableCell>
-                    <HoldTableCell>Status</HoldTableCell>
-                  </HoldTableHeader>
-                                      <HoldTableBody expanded={holdRequestsExpanded}>
+                <>
+                  <HoldRequestsTable expanded={holdRequestsExpanded}>
+                    <HoldTableHeader expanded={holdRequestsExpanded}>
+                      <HoldTableCell>Project</HoldTableCell>
+                      <HoldTableCell>User ID</HoldTableCell>
+                      <HoldTableCell>Request ID</HoldTableCell>
+                      <HoldTableCell>Sum</HoldTableCell>
+                      <HoldTableCell>Type</HoldTableCell>
+                      <HoldTableCell>Date</HoldTableCell>
+                      <HoldTableCell>Status</HoldTableCell>
+                    </HoldTableHeader>
+                    <HoldTableBody expanded={holdRequestsExpanded}>
                       {holdRequests.map((request, index) => (
                         <HoldTableRow 
                           key={request.id || index} 
@@ -897,7 +905,7 @@ const Requests = () => {
                         >
                           <HoldTableCell>{request.s_project?.name || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_user_id || '-'}</HoldTableCell>
-                          <HoldTableCell>{request.id || '-'}</HoldTableCell>
+                          <HoldTableCell>{request.s_request_id || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_amount ? `${request.s_amount} ${request.s_currency}` : '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_type || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_created_at ? new Date(request.s_created_at).toLocaleString('ru-RU', {
@@ -911,9 +919,48 @@ const Requests = () => {
                         </HoldTableRow>
                       ))}
                     </HoldTableBody>
-                </HoldRequestsTable>
+                  </HoldRequestsTable>
+                  {/* Пагинация */}
+                  <HoldPagination>
+                    <PaginationButton 
+                      onClick={handlePrevPage} 
+                      disabled={holdRequestsPage <= 1 || loadingHoldRequests}
+                    >
+                      <MdChevronLeft />
+                    </PaginationButton>
+                    <PaginationInfo>
+                      Страница {holdRequestsPage}
+                    </PaginationInfo>
+                    <PaginationButton 
+                      onClick={handleNextPage}
+                      disabled={loadingHoldRequests}
+                    >
+                      <MdChevronRight />
+                    </PaginationButton>
+                  </HoldPagination>
+                </>
               ) : holdRequestsExpanded ? (
-                <LoadingText>Нет отложенных заявок</LoadingText>
+                <>
+                  <LoadingText>Нет отложенных заявок</LoadingText>
+                  {/* Пагинация даже когда нет заявок */}
+                  <HoldPagination>
+                    <PaginationButton 
+                      onClick={handlePrevPage} 
+                      disabled={holdRequestsPage <= 1 || loadingHoldRequests}
+                    >
+                      <MdChevronLeft />
+                    </PaginationButton>
+                    <PaginationInfo>
+                      Страница {holdRequestsPage}
+                    </PaginationInfo>
+                    <PaginationButton 
+                      onClick={handleNextPage}
+                      disabled={loadingHoldRequests}
+                    >
+                      <MdChevronRight />
+                    </PaginationButton>
+                  </HoldPagination>
+                </>
               ) : null}
             </HoldRequestsContent>
           </HoldRequestsSection>

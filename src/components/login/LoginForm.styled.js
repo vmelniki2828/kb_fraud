@@ -36,6 +36,7 @@ export const Input = styled.input`
   margin-bottom: 8px;
   transition: box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(18,9,42,0.1);
+  
   &:focus {
     box-shadow: 0 0 0 2px #6c47ff;
   }
@@ -51,6 +52,7 @@ export const Button = styled.button`
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
+  
   &:hover {
     background: #4b2bbd;
   }

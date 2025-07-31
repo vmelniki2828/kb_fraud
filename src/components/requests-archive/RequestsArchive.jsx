@@ -172,7 +172,7 @@ const RequestsArchive = () => {
     try {
       const tokens = JSON.parse(localStorage.getItem('tokens'));
       const response = await fetch(
-        `https://209.38.237.223/antifraud-app/v1/antifraud/archived-request?id=${encodeURIComponent(id)}&page=${page}`,
+        `https://${process.env.REACT_APP_API_DOMAIN}/antifraud-app/v1/antifraud/archived-request?id=${encodeURIComponent(id)}&page=${page}`,
         {
           method: 'GET',
           headers: {
@@ -246,6 +246,7 @@ const RequestsArchive = () => {
                   <TableCell>User ID</TableCell>
                   <TableCell>Request ID</TableCell>
                   <TableCell>Sum</TableCell>
+                  <TableCell>Currency</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>Status</TableCell>
@@ -257,8 +258,9 @@ const RequestsArchive = () => {
                       <TableCell>{request.s_user_id || '-'}</TableCell>
                       <TableCell>{request.s_request_id || '-'}</TableCell>
                       <TableCell>
-                        {request.s_amount ? `${request.s_amount} ${request.s_currency}` : '-'}
+                        {request.s_amount ? `${request.s_amount} RUB` : '-'}
                       </TableCell>
+                      <TableCell>{request.s_currency ? `${request.s_currency}` : '-'}</TableCell>
                       <TableCell>{request.s_type || '-'}</TableCell>
                       <TableCell>
                         {request.s_created_at ? new Date(request.s_created_at).toLocaleString('ru-RU', {

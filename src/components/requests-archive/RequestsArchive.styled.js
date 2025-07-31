@@ -94,19 +94,31 @@ export const RequestTable = styled.div`
   overflow: hidden;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(108, 71, 255, 0.2);
 `;
 
 export const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   padding: 16px;
-  background: rgba(108, 71, 255, 0.1);
+  background: linear-gradient(135deg, rgba(108, 71, 255, 0.3) 0%, rgba(108, 71, 255, 0.1) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #6c47ff, transparent);
+  }
 `;
 
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   padding: 16px;
   transition: background-color 0.3s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -273,6 +285,37 @@ export const TableCell = styled.div`
   padding: 0 8px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  
+  ${TableHeader} & {
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  ${TableRow} & {
+    &:first-child {
+      font-weight: 600;
+      color: #9d7bff;
+    }
+    
+    &:nth-child(4) {
+      font-weight: 700;
+      color: #22c55e;
+      text-shadow: 0 0 6px rgba(34, 197, 94, 0.3);
+    }
+    
+    &:nth-child(2), &:nth-child(3) {
+      font-family: 'Courier New', monospace;
+      background: rgba(108, 71, 255, 0.1);
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  }
   
   &[data-status] {
     &::before {

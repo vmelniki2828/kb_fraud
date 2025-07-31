@@ -127,6 +127,11 @@ export const TableHeader = styled.tr`
 
 export const TableRow = styled.tr`
   background: rgba(255, 255, 255, 0.02);
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background: rgba(108, 71, 255, 0.05);
+  }
 `;
 
 export const TableCell = styled.td`
@@ -137,6 +142,7 @@ export const TableCell = styled.td`
   font-size: 1rem;
   font-weight: 500;
   position: relative;
+  vertical-align: middle;
   
   ${TableHeader} & {
     font-weight: 700;
@@ -587,6 +593,7 @@ export const HoldRequestsTable = styled.table`
   opacity: ${props => props.expanded ? 1 : 0};
   transform: ${props => props.expanded ? 'translateY(0)' : 'translateY(-20px)'};
   transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
 export const HoldPagination = styled.div`
@@ -638,15 +645,12 @@ export const PaginationInfo = styled.div`
 `;
 
 export const HoldTableBody = styled.tbody`
-  display: ${props => props.expanded ? 'table-row-group' : 'none'};
-  max-height: 250px;
-  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.02);
 `;
 
 export const HoldTableHeader = styled.tr`
-  background: linear-gradient(135deg, rgba(108, 71, 255, 0.4) 0%, rgba(108, 71, 255, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(108, 71, 255, 0.3) 0%, rgba(108, 71, 255, 0.1) 100%);
   position: relative;
-  display: ${props => props.expanded ? 'table-row' : 'none'};
   
   &::after {
     content: '';
@@ -661,46 +665,39 @@ export const HoldTableHeader = styled.tr`
 
 export const HoldTableRow = styled.tr`
   background: rgba(255, 255, 255, 0.02);
-  display: ${props => props.expanded ? 'table-row' : 'none'};
+  transition: background-color 0.3s ease;
   cursor: pointer;
-  transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(108, 71, 255, 0.1);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(108, 71, 255, 0.3);
+    background: rgba(108, 71, 255, 0.05);
   }
   
-  &:active {
-    transform: translateY(0);
+  &:last-child td {
+    border-bottom: none;
   }
 `;
 
 export const HoldTableCell = styled.td`
   padding: 12px 16px;
   color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
   font-size: 0.9rem;
   font-weight: 500;
-  position: relative;
+  vertical-align: middle;
   
   ${HoldTableHeader} & {
     font-weight: 700;
     color: #fff;
     text-transform: uppercase;
     font-size: 0.8rem;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    border-bottom: 2px solid rgba(108, 71, 255, 0.5);
-    background: linear-gradient(135deg, rgba(108, 71, 255, 0.2), rgba(157, 123, 255, 0.1));
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    border-bottom: 2px solid rgba(108, 71, 255, 0.4);
   }
   
   ${HoldTableRow} & {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    
     &:first-child {
-      text-align: center;
       font-weight: 600;
       color: #9d7bff;
     }
@@ -708,7 +705,7 @@ export const HoldTableCell = styled.td`
     &:nth-child(4) {
       font-weight: 700;
       color: #22c55e;
-      text-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+      text-shadow: 0 0 6px rgba(34, 197, 94, 0.3);
     }
     
     &:nth-child(2), &:nth-child(3) {

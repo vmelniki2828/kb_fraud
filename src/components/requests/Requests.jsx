@@ -74,8 +74,18 @@ const Requests = () => {
   const [holdRequestsPage, setHoldRequestsPage] = useState(1);
   const [loadingHoldRequests, setLoadingHoldRequests] = useState(false);
   const [holdRequestsExpanded, setHoldRequestsExpanded] = useState(false);
-  const [holdListActive, setHoldListActive] = useState(true);
+  const [holdListActive, setHoldListActive] = useState(false);
+  const [holdRequestsCount, setHoldRequestsCount] = useState(0);
+  const [userData, setUserData] = useState(null);
   const wsRef = useRef(null);
+
+  // Получаем данные пользователя при загрузке компонента
+  React.useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+  }, []);
 
   // Настройка notiflix
   React.useEffect(() => {
@@ -139,7 +149,7 @@ const Requests = () => {
 
   const getWebSocketUrl = () => {
     const domain = process.env.REACT_APP_API_DOMAIN;
-    return domain.replace('https://', 'wss://').replace('http://', 'ws://');
+    return `wss://${domain}/ws/antifraud/`;
   };
 
   const getBaseUrl = () => {
@@ -177,6 +187,10 @@ const Requests = () => {
       // Всегда заменяем массив новыми данными
       setHoldRequests(data.results || data || []);
       setHoldRequestsPage(page);
+      
+      // Обновляем количество заявок
+      const currentCount = data.results ? data.results.length : (Array.isArray(data) ? data.length : 0);
+      setHoldRequestsCount(currentCount);
       
     } catch (error) {
       console.error('Ошибка при загрузке hold-requests:', error);
@@ -580,7 +594,14 @@ const Requests = () => {
   };
 
   const handleNextPage = () => {
-    fetchHoldRequests(holdRequestsPage + 1);
+    if (holdRequestsCount >= 10) {
+      fetchHoldRequests(holdRequestsPage + 1);
+    } else {
+      Notify.info('Больше отложенных заявок нет', {
+        position: 'center-top',
+        timeout: 3000,
+      });
+    }
   };
 
   const handleDownloadFile = async (filePathOrObject) => {
@@ -591,17 +612,16 @@ const Requests = () => {
         return;
       }
 
-      let downloadUrl;
       let fileName;
       
       if (typeof filePathOrObject === 'string') {
         // Используем только имя файла
         fileName = filePathOrObject.split('/').pop() || 'file';
-        downloadUrl = `${getBaseUrl()}/antifraud-app/files/${fileName}`;
       } else {
-        downloadUrl = filePathOrObject.url || `${getBaseUrl()}/antifraud-app/files/${filePathOrObject.id}`;
         fileName = filePathOrObject.name || filePathOrObject.filename || `file_${filePathOrObject.id}`;
       }
+      
+      const downloadUrl = `${getBaseUrl()}/antifraud-app/files/${fileName}`;
       
       console.log('Скачивание файла:', { downloadUrl, fileName, fileData: filePathOrObject });
 
@@ -715,6 +735,7 @@ const Requests = () => {
                 <TableCell>User ID</TableCell>
                 <TableCell>Request ID</TableCell>
                 <TableCell>Sum</TableCell>
+                <TableCell>Currency</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Status</TableCell>
@@ -723,7 +744,8 @@ const Requests = () => {
                 <TableCell>{currentRequest.s_project?.name || '-'}</TableCell>
                 <TableCell>{currentRequest.s_user_id || '-'}</TableCell>
                 <TableCell>{currentRequest.s_request_id || '-'}</TableCell>
-                <TableCell>{currentRequest.s_amount ? `${currentRequest.s_amount} ${currentRequest.s_currency}` : '-'}</TableCell>
+                <TableCell>{currentRequest.s_amount ? `${currentRequest.s_amount} RUB` : '-'}</TableCell>
+                <TableCell>{currentRequest.s_currency ? `${currentRequest.s_currency}` : '-'}</TableCell>
                 <TableCell>{currentRequest.s_type || '-'}</TableCell>
                 <TableCell>{currentRequest.s_created_at ? new Date(currentRequest.s_created_at).toLocaleString('ru-RU', {
                   year: 'numeric',
@@ -829,12 +851,14 @@ const Requests = () => {
               >
                 Decline
               </ActionButton>
-              <ActionButton 
-                color="blue" 
-                onClick={() => handleAction('escalade')}
-              >
-                Escalade
-              </ActionButton>
+              {userData?.type !== 'tl' && (
+                <ActionButton 
+                  color="blue" 
+                  onClick={() => handleAction('escalade')}
+                >
+                  Escalade
+                </ActionButton>
+              )}
               <ActionButton 
                 color="yellow" 
                 onClick={() => handleAction('hold')}
@@ -892,6 +916,7 @@ const Requests = () => {
                       <HoldTableCell>User ID</HoldTableCell>
                       <HoldTableCell>Request ID</HoldTableCell>
                       <HoldTableCell>Sum</HoldTableCell>
+                      <HoldTableCell>Currency</HoldTableCell>
                       <HoldTableCell>Type</HoldTableCell>
                       <HoldTableCell>Date</HoldTableCell>
                       <HoldTableCell>Status</HoldTableCell>
@@ -906,7 +931,8 @@ const Requests = () => {
                           <HoldTableCell>{request.s_project?.name || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_user_id || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_request_id || '-'}</HoldTableCell>
-                          <HoldTableCell>{request.s_amount ? `${request.s_amount} ${request.s_currency}` : '-'}</HoldTableCell>
+                          <HoldTableCell>{request.s_amount ? `${request.s_amount} RUB` : '-'}</HoldTableCell>
+                          <HoldTableCell>{request.s_currency ? `${request.s_currency}` : '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_type || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_created_at ? new Date(request.s_created_at).toLocaleString('ru-RU', {
                             year: 'numeric',
@@ -933,7 +959,7 @@ const Requests = () => {
                     </PaginationInfo>
                     <PaginationButton 
                       onClick={handleNextPage}
-                      disabled={loadingHoldRequests}
+                      disabled={loadingHoldRequests || holdRequestsCount < 10}
                     >
                       <MdChevronRight />
                     </PaginationButton>

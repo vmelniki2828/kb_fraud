@@ -14,11 +14,33 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  const fetchUserData = async (accessToken) => {
+    try {
+      const response = await fetch(`https://${process.env.REACT_APP_API_DOMAIN}/api/user/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        localStorage.setItem('userData', JSON.stringify(userData));
+        console.log('Данные пользователя получены:', userData);
+      } else {
+        console.error('Ошибка получения данных пользователя:', response.status);
+      }
+    } catch (error) {
+      console.error('Ошибка получения данных пользователя:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      const response = await fetch('https://209.38.237.223/antifraud-app/auth/login/', {
+      const response = await fetch(`https://${process.env.REACT_APP_API_DOMAIN}/api/token/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,6 +55,10 @@ const LoginForm = () => {
 
       if (response.ok) {
         localStorage.setItem('tokens', JSON.stringify(data));
+        
+        // Получаем данные пользователя
+        await fetchUserData(data.access);
+        
         navigate('/requests');
         Notify.success('Успешная авторизация');
       } else {

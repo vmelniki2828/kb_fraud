@@ -673,10 +673,6 @@ const Requests = () => {
       wsRef.current.send(JSON.stringify(message));
       console.log(`Запрос на заявку ID: ${request.id} отправлен`);
       
-      // Закрываем Hold list и делаем кнопку неактивной
-      setHoldRequestsExpanded(false);
-      setHoldListActive(false);
-      
       // Показываем уведомление
       Notify.success(`Выбрана заявка #${request.id}`, {
         position: 'center-top',
@@ -742,7 +738,29 @@ const Requests = () => {
               </TableHeader>
               <TableRow>
                 <TableCell>{currentRequest.s_project?.name || '-'}</TableCell>
-                <TableCell>{currentRequest.s_user_id || '-'}</TableCell>
+                <TableCell>
+                  {currentRequest.s_user_id ? (
+                    <a 
+                      href={currentRequest.s_project?.fundist_link || '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        color: '#9d7bff', 
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                      onClick={(e) => {
+                        if (!currentRequest.s_project?.fundist_link) {
+                          e.preventDefault();
+                          Notify.info('Ссылка недоступна');
+                        }
+                      }}
+                    >
+                      {currentRequest.s_user_id}
+                    </a>
+                  ) : '-'}
+                </TableCell>
                 <TableCell>{currentRequest.s_request_id || '-'}</TableCell>
                 <TableCell>{currentRequest.s_amount ? `${currentRequest.s_amount} RUB` : '-'}</TableCell>
                 <TableCell>{currentRequest.s_currency ? `${currentRequest.s_currency}` : '-'}</TableCell>
@@ -919,7 +937,7 @@ const Requests = () => {
                       <HoldTableCell>Currency</HoldTableCell>
                       <HoldTableCell>Type</HoldTableCell>
                       <HoldTableCell>Date</HoldTableCell>
-                      <HoldTableCell>Status</HoldTableCell>
+                      <HoldTableCell>Comments</HoldTableCell>
                     </HoldTableHeader>
                     <HoldTableBody expanded={holdRequestsExpanded}>
                       {holdRequests.map((request, index) => (
@@ -929,7 +947,31 @@ const Requests = () => {
                           onClick={() => handleHoldRequestClick(request)}
                         >
                           <HoldTableCell>{request.s_project?.name || '-'}</HoldTableCell>
-                          <HoldTableCell>{request.s_user_id || '-'}</HoldTableCell>
+                          <HoldTableCell>
+                            {request.s_user_id ? (
+                              <a 
+                                href={request.s_project?.fundist_link || '#'} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ 
+                                  color: '#9d7bff', 
+                                  textDecoration: 'none',
+                                  cursor: 'pointer',
+                                  fontWeight: '600',
+                                  pointerEvents: 'auto'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!request.s_project?.fundist_link) {
+                                    e.preventDefault();
+                                    Notify.info('Ссылка недоступна');
+                                  }
+                                }}
+                              >
+                                {request.s_user_id}
+                              </a>
+                            ) : '-'}
+                          </HoldTableCell>
                           <HoldTableCell>{request.s_request_id || '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_amount ? `${request.s_amount} RUB` : '-'}</HoldTableCell>
                           <HoldTableCell>{request.s_currency ? `${request.s_currency}` : '-'}</HoldTableCell>
@@ -941,7 +983,20 @@ const Requests = () => {
                             hour: '2-digit',
                             minute: '2-digit'
                           }) : '-'}</HoldTableCell>
-                          <HoldTableCell>{request.status || 'hold'}</HoldTableCell>
+                          <HoldTableCell>
+                            {request.comments && request.comments.length > 0 ? (
+                              <div style={{ textAlign: 'left', fontSize: '12px' }}>
+                                <div style={{ fontWeight: 'bold', color: '#9d7bff', marginBottom: '4px' }}>
+                                  {request.comments[request.comments.length - 1].username || request.comments[request.comments.length - 1].user_display || 'Unknown'}
+                                </div>
+                                <div style={{ color: '#fff', lineHeight: '1.2' }}>
+                                  {request.comments[request.comments.length - 1].text}
+                                </div>
+                              </div>
+                            ) : (
+                              'No comments'
+                            )}
+                          </HoldTableCell>
                         </HoldTableRow>
                       ))}
                     </HoldTableBody>

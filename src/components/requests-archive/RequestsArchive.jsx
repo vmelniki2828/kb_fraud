@@ -255,7 +255,29 @@ const RequestsArchive = () => {
                   <React.Fragment key={request.id}>
                     <TableRow onClick={() => handleRowClick(request.id)}>
                       <TableCell>{request.s_project?.name || '-'}</TableCell>
-                      <TableCell>{request.s_user_id || '-'}</TableCell>
+                      <TableCell>
+                        {request.s_user_id ? (
+                          <a 
+                            href={request.s_project?.fundist_link || '#'} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ 
+                              color: '#9d7bff', 
+                              textDecoration: 'none',
+                              cursor: 'pointer',
+                              fontWeight: '600'
+                            }}
+                            onClick={(e) => {
+                              if (!request.s_project?.fundist_link) {
+                                e.preventDefault();
+                                Notify.info('Ссылка недоступна');
+                              }
+                            }}
+                          >
+                            {request.s_user_id}
+                          </a>
+                        ) : '-'}
+                      </TableCell>
                       <TableCell>{request.s_request_id || '-'}</TableCell>
                       <TableCell>
                         {request.s_amount ? `${request.s_amount} RUB` : '-'}
